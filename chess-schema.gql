@@ -1,0 +1,601 @@
+define
+
+    piece sub entity,
+    plays mover,
+    plays positioned,
+    has colour;
+
+    colour sub attribute,
+    value string;
+
+    traversal-type sub attributes,
+    value string;
+
+    king sub piece;
+
+    # test piece with very limited functionality
+    lameRook sub piece;
+
+    rook sub piece;
+    bishop sub piece;
+    queen sub piece;
+    pawn sub piece;
+    knight sub piece;
+
+
+    square sub entity,
+    plays origin,
+    plays destination,
+    # plays up,
+    # plays down,
+    plays left,
+    plays right,
+    plays direct-white,
+    plays direct-black,
+    plays toward-white,
+    plays toward-black,
+    plays adjacent,
+    plays position,
+    plays start-node,
+    plays end-node;
+    # has xPos,
+    # has yPos;
+
+    board sub entity;
+
+
+    potential-move sub relation,
+    relates mover,
+    relates origin,
+    relates destination;
+
+    adjacency sub relation,
+    abstract,
+    relates adjacent;
+
+    cross-adjacency sub adjacency,
+    relates adjacent;
+
+    vertical-adjacency sub cross-adjacency,
+    relates direct-white as adjacent,
+    relates direct-black as adjacent;
+
+    horizontal-adjacency sub cross-adjacency,
+    relates left as adjacent,
+    relates right as adjacent;
+
+    diag-adjacency sub adjacency,
+    relates toward-white as adjacent,
+    relates toward-black as adjacent;
+
+    north-east-adjacency sub diag-adjacency,
+    relates toward-white as adjacent,
+    relates toward-black as adjacent;
+
+    north-west-adjacency sub diag-adjacency,
+    relates toward-white as adjacent,
+    relates toward-black as adjacent;
+    
+
+    legal-move sub potential-move,
+    relates mover,
+    relates origin,
+    relates destination;    
+
+    positioning sub relation,
+    relates positioned,
+    relates position;
+
+    traversal sub relation,
+    relates start-node,
+    relates end-node;
+
+    trans-traversal sub traversal,
+    has traversal-type,
+    relates start-node,
+    relates end-node;
+    
+    single-traversal sub traversal,
+    has traversal-type,
+    relates start-node,
+    relates end-node;
+    
+    cross-single-traversal sub single-traversal,
+    relates start-node,
+    relates end-node;
+
+    cross-trans-traversal sub trans-traversal,
+    relates start-node,
+    relates end-node;
+
+    vertical-single-traversal sub cross-single-traversal,
+    relates start-node,
+    relates end-node;
+
+    vertical-trans-traversal sub cross-trans-traversal,
+    relates start-node,
+    relates end-node;
+
+    # vst-rule sub rule,
+    # when {
+    #     (adjacent: $a, adjacent: $b) isa vertical-adjacency;
+    # }, then {
+    #     (start-node: $a,end-node: $b) isa vertical-single-traversal;
+    # };
+
+    vst-rule1 sub rule,
+    when {
+        (direct-white: $a, direct-black: $b) isa vertical-adjacency;
+    }, then {
+        (start-node: $a,end-node: $b) isa vertical-single-traversal;
+    };
+    
+    vst-rule2 sub rule,
+    when {
+        (direct-black: $a, direct-white: $b) isa vertical-adjacency;
+    }, then {
+        (start-node: $a,end-node: $b) isa vertical-single-traversal;
+    };
+
+    # vtt-rule sub rule,
+    # when {
+    #     (adjacent: $a, adjacent: $b) isa vertical-adjacency;
+    # }, then {
+    #     (start-node: $a,end-node: $b) isa vertical-trans-traversal;
+    # };
+
+    vtt-rule sub rule,
+    when {
+        (start-node: $a, end-node: $b) isa vertical-single-traversal;
+    }, then {
+        (start-node: $a,end-node: $b) isa vertical-trans-traversal;
+    };
+
+    horizontal-single-traversal sub cross-single-traversal,
+    relates start-node,
+    relates end-node;
+
+    horizontal-trans-traversal sub cross-trans-traversal,
+    relates start-node,
+    relates end-node;
+
+    # hst-rule sub rule,
+    # when {
+    #     (adjacent: $a, adjacent: $b) isa horizontal-adjacency;
+    # }, then {
+    #     (start-node: $a, end-node: $b) isa horizontal-single-traversal;
+    # };
+
+    hst-rule1 sub rule,
+    when {
+        (left: $a, right: $b) isa horizontal-adjacency;
+    }, then {
+        (start-node: $a, end-node: $b) isa horizontal-single-traversal;
+    };
+
+    hst-rule2 sub rule,
+    when {
+        (right: $a, left: $b) isa horizontal-adjacency;
+    }, then {
+        (start-node: $a, end-node: $b) isa horizontal-single-traversal;
+    };
+
+    # htt-rule sub rule,
+    # when {
+    #     (adjacent: $a, adjacent: $b) isa horizontal-adjacency;
+    # }, then {
+    #     (start-node: $a, end-node: $b) isa horizontal-trans-traversal;
+    # };
+
+    htt-rule sub rule,
+    when {
+        (start-node: $a, end-node: $b) isa horizontal-single-traversal;
+    }, then {
+        (start-node: $a, end-node: $b) isa horizontal-trans-traversal;
+    };
+
+    # currently allowed, but not advised
+    # vst-rule sub rule,
+    # when {
+    #     $a isa vertical-adjacency;
+    # }, then {
+    #     $a isa vertical-single-traversal;
+    # };
+
+    # These rules are no longer needed: we made a more elegant solution for constructing pawn moves.
+    # white-single-traversal sub traversal;
+
+    # wst-rule sub rule,
+    # when {
+    #     (direct-white: $d, direct-black: $u) isa vertical-adjacency;
+    # }, then {
+    #     (start-node: $d, end-node: $u) isa white-single-traversal;
+    # };
+
+    # black-single-traversal sub traversal;
+
+    # bst-rule sub rule,
+    # when {
+    #     (direct-white: $d, direct-black: $u) isa vertical-adjacency;
+    # }, then {
+    #     (start-node: $u, end-node: $d) isa black-single-traversal;
+    # };
+
+    # white-take-traversal sub traversal;
+
+    # wtt-rule sub rule,
+    # when {
+    #     (toward-white: $d, toward-black: $u) isa diag-adjacency;
+    # }, then {
+    #     (start-node: $d, end-node: $u) isa white-take-traversal;
+    # };
+
+    # black-take-traversal sub traversal;
+
+    # wtt-rule sub rule,
+    # when {
+    #     (toward-black: $d, toward-black: $u) isa diag-adjacency;
+    # }, then {
+    #     (start-node: $u, end-node: $d) isa black-take-traversal;
+    # };
+
+    diag-single-traversal sub single-traversal,
+    relates start-node,
+    relates end-node;
+
+    diag-trans-traversal sub trans-traversal,
+    relates start-node,
+    relates end-node;
+
+    nw-single-traversal sub diag-single-traversal,
+    relates start-node,
+    relates end-node;
+
+    nw-trans-traversal sub diag-trans-traversal,
+    relates start-node,
+    relates end-node;
+
+    # nwst-rule sub rule,
+    # when {
+    #     (adjacent: $a, adjacent: $b) isa north-west-adjacency;
+    # }, then {
+    #     (start-node: $a, end-node: $b) isa nw-single-traversal;
+    # };
+
+    nwst-rule1 sub rule,
+    when {
+        (toward-white: $a, toward-black: $b) isa north-west-adjacency;
+    }, then {
+        (start-node: $a, end-node: $b) isa nw-single-traversal;
+    };
+
+    nwst-rule2 sub rule,
+    when {
+        (toward-black: $a, toward-white: $b) isa north-west-adjacency;
+    }, then {
+        (start-node: $a, end-node: $b) isa nw-single-traversal;
+    };
+
+    # nwtt-rule sub rule,
+    # when {
+    #     (adjacent: $a, adjacent: $b) isa north-west-adjacency;
+    # }, then {
+    #     (start-node: $a, end-node: $b) isa nw-trans-traversal;
+    # };
+
+    nwtt-rule sub rule,
+    when {
+        (start-node: $a, end-node: $b) isa nw-single-traversal;
+    }, then {
+        (start-node: $a, end-node: $b) isa nw-trans-traversal;
+    };
+
+    ne-single-traversal sub diag-single-traversal,
+    relates start-node,
+    relates end-node;
+
+    ne-trans-traversal sub diag-trans-traversal,
+    relates start-node,
+    relates end-node;
+
+    # nest-rule sub rule,
+    # when {
+    #     (adjacent: $a, adjacent: $b) isa north-east-adjacency;
+    # }, then {
+    #     (start-node: $a, end-node: $b) isa nw-single-traversal;
+    # };
+
+    nest-rule1 sub rule,
+    when {
+        (toward-white: $a, toward-black: $b) isa north-east-adjacency;
+    }, then {
+        (start-node: $a, end-node: $b) isa nw-single-traversal;
+    };
+
+    nest-rule2 sub rule,
+    when {
+        (toward-black: $a, toward-white: $b) isa north-east-adjacency;
+    }, then {
+        (start-node: $a, end-node: $b) isa nw-single-traversal;
+    };
+
+    # nett-rule sub rule,
+    # when {
+    #     (adjacent: $a, adjacent: $b) isa north-east-adjacency;
+    # }, then {
+    #     (start-node: $a, end-node: $b) isa nw-trans-traversal;
+    # };
+
+    nett-rule sub rule,
+    when {
+        (start-node: $a, end-node: $b) isa ne-single-traversal;
+    }, then {
+        (start-node: $a, end-node: $b) isa ne-trans-traversal;
+    };
+    
+    knight-traversal sub traversal,
+    relates start-node,
+    relates end-node;
+
+    knight-rule sub rule,
+    when {
+        $adj1 sub cross-adjacency;
+        $adj2 sub cross-adjacency;
+        $adj1 != $adj2;
+        (adjacent: $a, adjacent: $b) isa! $adj1;
+        (adjacent: $b, adjacent: $c) isa! $adj1;
+        $a != $c;
+        (adjacent: $c, adjacent: $d) isa! $adj2;
+    }, then {
+        (start-node: $a, end-node: $d) isa knight-traversal;
+    };
+
+    # rook-vert-move sub rule,
+    # when {
+    #     $r isa rook;
+    #     (positioned: $r, position: $a) isa positioning;
+    #     (start-node: $a, end-node: $b) isa vertical-trans-traversal;
+    # }, then {
+    #     (mover: $r, origin: $a, destination: $b) isa potential-move;
+    # };
+
+    # rook-horiz-move sub rule,
+    # when {
+    #     $r isa rook;
+    #     (positioned: $r, position: $a) isa positioning;
+    #     (start-node: $a, end-node: $b) isa horizontal-trans-traversal;
+    # }, then {
+    #     (mover: $r, origin: $a, destination: $b) isa potential-move;
+    # };
+
+    rook-move sub rule,
+    when {
+        $r isa rook;
+        (positioned: $r, position: $a) isa positioning;
+        (start-node: $a, end-node: $b) isa cross-trans-traversal;
+    }, then {
+        (mover: $r, origin: $a, destination: $b) isa potential-move;
+    };
+
+    bishop-move sub rule,
+    when {
+        $e isa bishop;
+        (positioned: $e, position: $a) isa positioning;
+        (start-node: $a, end-node: $b) isa diag-trans-traversal;
+    }, then {
+        (mover: $e, origin: $a, destination: $b) isa potential-move;
+    };
+
+    queen-move sub rule,
+    when {
+        $q isa queen;
+        (positioned: $q, position: $a) isa positioning;
+        (start-node: $a, end-node: $b) isa trans-traversal;
+    }, then {
+        (mover: $q, origin: $a, destination: $b) isa potential-move;
+    };
+
+    king-move sub rule,
+    when {
+        $k isa king;
+        (positioned: $k, position: $a) isa positioning;
+        (start-node: $a, end-node: $b) isa single-traversal;
+    }, then {
+        (mover: $k, origin: $a, destination: $b) isa potential-move;
+    };
+    
+    white-pawn-move sub rule,
+    when {
+        $p isa pawn, has colour "white";
+        (positioned: $p, position: $a) isa positioning;
+        (start-node: $a, end-node: $b) isa vertical-single-traversal;
+        not {(positioned: $pc, position: $b) isa positioning;};
+        (direct-white: $a, direct-black: $b) isa vertical-adjacency;
+    }, then {
+        (mover: $p, origin: $a, destination: $b) isa potential-move;
+    };
+
+    white-pawn-take sub rule,
+    when {
+        $p isa pawn, has colour "white";
+        $trav sub diag-single-traversal;
+        (positioned: $p, position: $a) isa positioning;
+        (start-node: $a, end-node: $b) isa $trav;
+        $pc isa piece, has colour "black";
+        (positioned: $pc, position: $b) isa positioning;
+        (toward-white: $a, toward-black: $b) isa diag-adjacency;
+    }, then {
+        (mover: $p, origin: $a, destination: $b) isa potential-move;
+    };
+
+    black-pawn-move sub rule,
+    when {
+        $p isa pawn, has colour "black";
+        (positioned: $p, position: $a) isa positioning;
+        (start-node: $a, end-node: $b) isa vertical-single-traversal;
+        not {(positioned: $pc, position: $b) isa positioning;};
+        (direct-white: $b, direct-black: $a) isa vertical-adjacency;
+    }, then {
+        (mover: $p, origin: $a, destination: $b) isa potential-move;
+    };
+
+    black-pawn-take sub rule,
+    when {
+        $p isa pawn, has colour "black";
+        $trav sub diag-single-traversal;
+        (positioned: $p, position: $a) isa positioning;
+        (start-node: $a, end-node: $b) isa $trav;
+        $pc isa piece, has colour "white";
+        (positioned: $pc, position: $b) isa positioning;
+        (toward-white: $b, toward-black: $a) isa diag-adjacency;
+    }, then {
+        (mover: $p, origin: $a, destination: $b) isa potential-move;
+    };
+
+    knight-move sub rule,
+    when {
+        $k isa knight;
+        (positioned: $k, position: $a) isa positioning;
+        (start-node: $a, end-node: $b) isa knight-traversal;
+    }, then {
+        (mover: $k, origin: $a, destination: $b) isa potential-move;
+    };
+
+    # probably won't work, will block out until all other errors are eliminated
+    transitivity sub rule,
+    when {
+        $trav sub trans-traversal;
+        (start-node: $a, end-node: $b) isa! $trav;
+        (start-node: $b, end-node: $c) isa! $trav;
+        $a != $c;
+    }, then {
+        (start-node: $a, end-node: $c) isa $trav;
+    };
+
+    trans sub rule,
+    when {
+        (start-node: $a, end-node: $b) isa trans-traversal, has traversal-type $t;
+        (start-node: $b, end-node: $c) isa trans-traversal, has traversal-type $t;
+        $a != $c;
+    }, then {
+        (start-node: $a, end-node: $c) isa trans-traversal;
+    };
+
+    trans2 sub rule,
+    when {
+        (start-node: $a, end-node: $b) isa trans-traversal, has traversal-type $t;
+        (start-node: $b, end-node: $c) isa trans-traversal, has traversal-type $t;
+        $a != $c;
+        $g (start-node: $a, end-node: $c) isa trans-traversal;
+    }, then {
+        $g has traversal-type $t;
+    };
+
+    horizontal-transitivity sub rule,
+    when {
+        (start-node: $a, end-node: $b) isa horizontal-trans-traversal;
+        (start-node: $b, end-node: $c) isa horizontal-trans-traversal;
+        $a != $c;
+    }, then {
+        (start-node: $a, end-node: $c) isa horizontal-trans-traversal;
+    };
+
+    # can get to, but not past, a piece. This lets us take
+
+    # does this work? If not, can we do it with attributes?
+    # Can we use it in an insert?
+    # blocking-transitivity sub rule,
+    # when {
+    #     $trav sub trans-traversal;
+    #     (start-node: $a, end-node: $b) isa! $trav;
+    #     not {(position: $b, positioned: $p) isa positioning;};
+    #     (start-node: $b, end-node: $c) isa! $trav;
+    #     $a != $c;
+    # }, then {
+    #     (start-node: $a, end-node: $c) isa $trav;
+    # };
+
+    # need to deal with taking, and then just need to check for checking.
+    
+    # vert-lame-rook sub rule,
+    # when {
+    #     $r isa lameRook;
+    #     (adjacent: $u, adjacent: $d) isa vertical-adjacency,
+    #     (positioned: $r, position: $u) isa positioning;
+    # }, then {
+    #     (mover: $r, destination: $d) isa potential-move;
+    # };
+
+    # horiz-lame-rook sub rule,
+    # when {
+    #     $r isa lameRook;
+    #     (adjacent: $u, adjacent: $d) isa horizontal-adjacency;
+    #     (positioned: $r, position: $u) isa positioning;
+    # }, then {
+    #     (mover: $r, destination: $d) isa potential-move;
+    # };
+
+    # vert-rook sub rule,
+    # when {
+    #     $r is a rook;
+    #     (adjacent: $u, adjacent: $d) isa vertical-adjacency;
+    #     (adjacent: $d, adjacent: $y) isa vertical-adjacency;
+    #     (positioned: $r, position: $u);
+    # }, then {
+    #     (mover; $r, destination: $y) isa potential-move;
+    # } #
+
+    # need to implement blocking
+    # transitivity sub rule,
+    # when {
+    #     $adj sub adjacency;
+    #     (adjacent: $a, adjacent: $b) isa! $adj;
+    #     (adjacent: $b, adjacent: $c) isa! $adj;
+    #     $a != $c;
+    # }, then {
+    #     (adjacent: $a, adjacent: $c) isa! $adj;
+    # };
+
+
+
+    # rook sub rule, 
+    # when {
+    #     $r isa rook;
+    #     (position: $a, positioned: $r) isa positioning;
+    #     $adj sub adjacency
+    #     (adjacent: $a, adjacent: $b) isa $adj;
+    # }, then {
+    #     (mover: $r, origin: $a, destination: $b) isa potential-move;
+    # };
+
+    # rook-trans sub rule,
+    # when {
+    #     $r isa rook;
+    #     $adj sub adjacency;
+    #     (mover: $r, origin: $a, destination: $b) isa potential-move;
+    #     ($a, $b) isa $adj;
+    #     (mover: $r, origin: $b, destination: $c) isa potential-move;
+    #     ($c, $b) isa $adj;
+    # }, then {
+    #     (mover: $r, origin: $a, destination: $c) isa potential-move;
+    # }
+
+
+# DATA
+
+insert 
+
+    $s11 isa square;
+    $s12 isa square;
+    $s13 isa square;
+    $s14 isa square;
+    $s21 isa square;
+    $s22 isa square;
+    $s23 isa square;
+    $s24 isa square;
+
+    (left: $s11, right: $s12) isa horizontal-adjacency;
+    (left: $s12, right: $s13) isa horizontal-adjacency;
+    (left: $s13, right: $s14) isa horizontal-adjacency;
+
+
