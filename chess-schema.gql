@@ -219,8 +219,8 @@ define
         $dir isa diagangle, has colour $col;
         (positioned: $p, position: $a) isa positioning;
         (start-node: $a, end-node: $b, trav-direction: $dir) isa single-traversal;
-        (piece: $pc, position: $b) isa positioning;
-        $pc has colour $col2;
+        $pc isa piece, has colour $col2;
+        (positioned: $pc, position: $b) isa positioning;
         $col != $col2;
     }, then {
         (mover: $p, origin: $a, destination: $b) isa potential-move;
@@ -287,10 +287,10 @@ insert
     $swDiag isa diagangle, has colour "black";
     $seDiag isa diagangle, has colour "black";
 
-    (base-dir: $left, base-dir: $fromWhite, inferred-dir: $neDiag) isa dir-creation;
-    (base-dir: $left, base-dir: $fromBlack, inferred-dir: $seDiag) isa dir-creation;
-    (base-dir: $right, base-dir: $fromWhite, inferred-dir: $nwDiag) isa dir-creation;
-    (base-dir: $right, base-dir: $fromBlack, inferred-dir: $swDiag) isa dir-creation;
+    (base-dir: $left, base-dir: $fromWhite, inferred-dir: $nwDiag) isa dir-creation;
+    (base-dir: $left, base-dir: $fromBlack, inferred-dir: $swDiag) isa dir-creation;
+    (base-dir: $right, base-dir: $fromWhite, inferred-dir: $neDiag) isa dir-creation;
+    (base-dir: $right, base-dir: $fromBlack, inferred-dir: $seDiag) isa dir-creation;
 
     (start-square: $sa1, end-square: $sa2, adj-direction: $fromWhite) isa adjacency;
     (start-square: $sa2, end-square: $sa3, adj-direction: $fromWhite) isa adjacency;
