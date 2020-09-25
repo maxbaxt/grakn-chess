@@ -1,0 +1,23 @@
+define
+
+    element sub entity,
+    plays first,
+    plays second;
+
+    symmetric sub relation,
+    relates first,
+    relates second;
+
+    symmetry sub rule,
+    when {
+        $s sub symmetric;
+        (first: $a, second: $b) isa $s;
+    }, then {
+        (first: $b, second: $a) isa $s;
+    };
+
+insert
+
+    $a isa ent;
+    $b isa ent;
+    (first: $a, second: $b) isa symmetric;
