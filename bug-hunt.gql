@@ -1,0 +1,33 @@
+define
+
+    person sub entity,
+    plays president,
+    has hair;
+
+    hair sub attribute,
+    value string;
+
+    citizenship sub relation,
+    relates citizen;
+
+    presidency sub citizenship,
+    relates president as citizen;
+   
+
+    # orange-man sub rule,
+    # when {
+    #     # (citizen: $a) isa citizenship; # works as intended
+    #     # (president: $a) isa citizenship; # breaks as intended
+    #     (citizen: $a) isa presidency; # breaks, but should work
+    #     # (president: $a) isa presidency; #works as intended
+    # }, then {
+    #     $a has hair "orange";
+    # };
+
+
+insert
+
+    $trump isa person;
+    (president: $trump) isa presidency;
+
+ 
