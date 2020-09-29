@@ -15,9 +15,3 @@ define
     }, then {
         (first: $b, second: $a) isa $s;
     };
-
-insert
-
-    $a isa ent;
-    $b isa ent;
-    (first: $a, second: $b) isa symmetric;
